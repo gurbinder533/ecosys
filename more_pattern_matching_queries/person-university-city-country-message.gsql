@@ -1,0 +1,22 @@
+//graph schema is on page 13 https://ldbc.github.io/ldbc_snb_docs/ldbc-snb-specification.pdf
+//IS 1 query description is on page 46 https://ldbc.github.io/ldbc_snb_docs/ldbc-snb-specification.pdf
+//MATCH (p:Person)-[:STUDY_AT]->(:University)-[:IS_LOCATED_IN]->(:City)-[:IS_PART_OF]->(c:Country), (p)-[:LIKES]->(m:Message)-[:IS_LOCATED_IN]->(c) RETURN count(m);
+SET syntax_version = "v2"
+USE GRAPH ldbc_snb
+DROP QUERY q4 
+
+CREATE QUERY q4() FOR GRAPH ldbc_snb {
+  SumAccum<INT> @@count;
+  
+  vPerson = 
+    SELECT p
+    FROM Country:c-(<IS_LOCATED_IN)-(Post|Comment)-(<LIKES)-Person:p-(STUDY_AT>)-University-(IS_LOCATED_IN>)-City-(IS_PART_OF>)-Country:c
+    ACCUM @@count +=1; 
+
+  PRINT @@count;
+ }
+
+// INSTALL QUERY q4 
+// RUN QUERY q4()
+SET query_timeout = 180000
+INTERPRET QUERY q4()

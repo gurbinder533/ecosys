@@ -1,0 +1,41 @@
+//graph schema is on page 13 https://ldbc.github.io/ldbc_snb_docs/ldbc-snb-specification.pdf
+//IS 1 query description is on page 46 https://ldbc.github.io/ldbc_snb_docs/ldbc-snb-specification.pdf
+SET syntax_version = "v2"
+USE GRAPH ldbc_snb
+DROP QUERY demo3
+
+CREATE QUERY demo3() FOR GRAPH ldbc_snb {
+  SumAccum<INT> @@count, @@trueCount;
+  //SumAccum<string> @tagName;
+  //OrAccum @hasInterest;
+
+  //vPerson = SELECT p FROM Person:p-(HAS_INTEREST>)-Tag:t  ACCUM p.@tagName += t.name;
+//  vPerson = 
+//    SELECT p
+//    FROM Person:p-(LIKES>:e)-(Post|Comment):m-(HAS_TAG>:h)-Tag:t-(<HAS_INTEREST)-Person:p
+//    ACCUM p.@hasInterest = true;
+  
+ // P =
+ //   SELECT p
+ //   from Person:p WHERE p.@hasInterest == false
+ //   ACCUM @@count += 1;
+   
+  vPerson = 
+    SELECT p
+    FROM Tag:a-(<HAS_INTEREST:e)-Person:p-(LIKES>:h)-(Post|Comment):m-(HAS_TAG>:l)-Tag:a
+    ACCUM @@count +=1; 
+
+// P =
+//   SELECT p
+//   from Person:p WHERE p.@hasInterest == false
+//   ACCUM @@count += 1;
+ 
+  PRINT @@count;
+   
+
+ }
+
+// INSTALL QUERY demo3
+// RUN QUERY demo3()
+SET query_timeout = 180000
+INTERPRET QUERY demo3()

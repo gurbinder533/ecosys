@@ -1,0 +1,22 @@
+//graph schema is on page 13 https://ldbc.github.io/ldbc_snb_docs/ldbc-snb-specification.pdf
+//IS 1 query description is on page 46 https://ldbc.github.io/ldbc_snb_docs/ldbc-snb-specification.pdf
+SET syntax_version = "v2"
+USE GRAPH ldbc_snb
+DROP QUERY tagpersonmessagecountry 
+
+CREATE QUERY tagpersonmessagecountry() FOR GRAPH ldbc_snb {
+
+  SumAccum<INT> @@count;
+  vPerson = 
+    SELECT p
+    FROM Tag:a-(<HAS_INTEREST:e)-Person:p-(LIKES>:h)-(Post|Comment):m-(IS_LOCATED_IN>:l)-Country:c
+    ACCUM @@count += 1; 
+    
+
+  PRINT @@count;
+}
+
+// INSTALL QUERY tagpersonmessagecountry
+// RUN QUERY tagpersonmessagecountry()
+SET query_timeout = 180000
+INTERPRET QUERY tagpersonmessagecountry()
